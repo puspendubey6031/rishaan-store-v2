@@ -1,1 +1,177 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rishaan Daily Needs</title>
+<style>
+body { margin:0; font-family: Arial, sans-serif; background:#f8f8f8; }
+header { position: fixed; top:0; left:0; right:0; background:#2e7d32; color:white; padding:8px 15px; z-index:10; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+header select { padding:4px 6px; border-radius:5px; border:none; font-size:14px; }
+.slogan { margin-top:50px; text-align:center; padding:8px 0; font-weight:bold; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.slogan span { display:inline-block; margin:0 6px; }
+.slogan .doorstep { color: #fbc02d; }
+.slogan .premium-price { color: #c62828; }
+.slogan .premium-quality { color: #2e7d32; }
+.categories { display:flex; overflow-x:auto; padding:10px; gap:10px; margin:10px; }
+.category { flex:0 0 auto; text-align:center; cursor:pointer; }
+.category img { width:60px; height:60px; border-radius:50%; object-fit:cover; }
+.products { display:flex; flex-direction:column; gap:15px; padding:10px 10px 90px 10px; }
+.product-card { background:white; border-radius:10px; padding:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); display:flex; gap:10px; align-items:center; scroll-margin-top:70px; }
+.product-card img { width:100px; height:100px; object-fit:cover; border-radius:5px; }
+.product-info { flex:1; }
+.brand { font-weight:bold; color:#d32f2f; margin-top:3px; display:block; }
+.description { font-size:14px; color:#555; margin-top:4px; }
+.price { font-weight:bold; color:#000; margin-top:4px; }
+.quantity { width:100%; margin:5px 0; }
+.add-btn { background:#2e7d32; color:white; border:none; padding:5px; width:100%; border-radius:5px; cursor:pointer; }
+.cart-bar { position: fixed; bottom:0; left:0; right:0; background:#333; color:white; display:flex; justify-content:space-between; align-items:center; padding:10px; gap:10px; z-index:10; }
+.cart-info { font-size:14px; }
+.order-btn { background:#2e7d32; border:none; padding:10px; color:white; border-radius:5px; cursor:pointer; }
+.admin-btn { background:#d32f2f; border:none; padding:10px; color:white; border-radius:5px; cursor:pointer; }
+select, input[type=number] { border-radius:5px; padding:5px; width:100%; margin:3px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rishaan Daily Needs</h1>
+  <select>
+    <option value="en">EN</option>
+    <option value="bn">BN</option>
+    <option value="hi">HI</option>
+  </select>
+</header>
+
+<div class="slogan">
+  <span class="doorstep">Doorstep Delivery</span>
+  <span class="premium-price">Premium Price</span>
+  <span class="premium-quality">Premium Quality</span>
+</div>
+
+<div class="categories">
+  <div class="category" data-category="Rice"><img src="https://i.imgur.com/1X2t1kK.jpg" alt="Rice"><br>Rice</div>
+  <div class="category" data-category="Oil"><img src="https://i.imgur.com/YUQv7rC.jpg" alt="Oil"><br>Oil</div>
+  <div class="category" data-category="Snacks"><img src="https://i.imgur.com/xj1mjTl.jpg" alt="Snacks"><br>Snacks</div>
+  <div class="category" data-category="Spices"><img src="https://i.imgur.com/N0s8aVg.jpg" alt="Spices"><br>Spices</div>
+  <div class="category" data-category="Pulses"><img src="https://i.imgur.com/fZ9u5f9.jpg" alt="Pulses"><br>Pulses</div>
+  <div class="category" data-category="Flour"><img src="https://i.imgur.com/2s0Bk6P.jpg" alt="Flour"><br>Flour</div>
+  <div class="category" data-category="Biscuits"><img src="https://i.imgur.com/YhrxBCg.jpg" alt="Biscuits"><br>Biscuits</div>
+  <div class="category" data-category="Tea"><img src="https://i.imgur.com/kk0v5vE.jpg" alt="Tea"><br>Tea</div>
+  <div class="category" data-category="Coffee"><img src="https://i.imgur.com/2SnJcw5.jpg" alt="Coffee"><br>Coffee</div>
+  <div class="category" data-category="Honey"><img src="https://i.imgur.com/kWqAG6F.jpg" alt="Honey"><br>Honey</div>
+</div>
+
+<div class="products" id="product-list">
+  <!-- Product cards dynamically added here by JS -->
+</div>
+
+<div class="cart-bar">
+  <div class="cart-info" id="cart-info">Cart: 0 items | Total: ₹0</div>
+  <button class="order-btn" onclick="orderNow()">Order Now</button>
+  <button class="admin-btn" onclick="adminAccess()">Admin</button>
+</div>
+
+<script>
+let products = [
+  {name:"Sona Masoori Loose", brand:"Loose", desc:"High quality premium rice from local farms", price:5, type:"Loose", category:"Rice", quantityOptions:generateQuantity()},
+  {name:"Basmati Rice", brand:"Daawat", desc:"Aromatic basmati rice, perfect for biryani and pulao", price:120, type:"Packet", category:"Rice", quantityOptions:generateQuantity()},
+  {name:"Sunflower Oil", brand:"Fortune", desc:"Cold pressed sunflower oil, healthy and light", price:180, type:"Packet", category:"Oil", quantityOptions:generateQuantity()},
+  {name:"Potato Chips", brand:"Lay's", desc:"Crunchy and salty snack for everyone", price:20, type:"Packet", category:"Snacks", quantityOptions:generateQuantity()}
+];
+
+let cart = [];
+
+function generateQuantity(){
+  // generate 100g to 10kg options
+  let q = [];
+  for(let i=100;i<=10000;i+=100){ // in grams
+    if(i<1000) q.push(`${i} g`);
+    else q.push(`${i/1000} kg`);
+  }
+  return q;
+}
+
+function renderProducts() {
+  const container = document.getElementById('product-list');
+  container.innerHTML = "";
+  products.forEach((p,i)=>{
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.setAttribute("data-category", p.category);
+    card.innerHTML = `
+      <img src="${getProductImage(p)}" alt="${p.name}">
+      <div class="product-info">
+        <div>${p.name}</div>
+        <span class="brand">${p.type==="Packet"?p.brand:"Loose"}</span>
+        <div class="description">${p.desc}</div>
+        <div class="price">₹<span id="price-${i}">${p.price}</span></div>
+        <select class="quantity" id="qty-${i}">${p.quantityOptions.map(q=>`<option>${q}</option>`).join('')}</select>
+        <button class="add-btn" onclick="addToCart(${i})">Add</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function getProductImage(p){
+  switch(p.name){
+    case "Sona Masoori Loose": return "https://i.imgur.com/1X2t1kK.jpg";
+    case "Basmati Rice": return "https://i.imgur.com/1X2t1kK.jpg";
+    case "Sunflower Oil": return "https://i.imgur.com/YUQv7rC.jpg";
+    case "Potato Chips": return "https://i.imgur.com/xj1mjTl.jpg";
+    default: return "https://via.placeholder.com/150";
+  }
+}
+
+function addToCart(index){
+  const qtySelect = document.getElementById(`qty-${index}`);
+  const selectedQty = qtySelect.value;
+  const product = {...products[index], selectedQty};
+  cart.push(product);
+  updateCart();
+}
+
+function updateCart(){
+  let totalItems = cart.length;
+  let totalPrice = cart.reduce((sum,p)=>sum+p.price,0);
+  document.getElementById('cart-info').innerText = `Cart: ${totalItems} items | Total: ₹${totalPrice}`;
+}
+
+function orderNow(){
+  let msg = cart.map(p=>`${p.name} - ${p.selectedQty} - ₹${p.price}`).join('\n');
+  window.open(`https://wa.me/+917557820107?text=Order:%0A${encodeURIComponent(msg)}`,'_blank');
+}
+
+function adminAccess(){
+  let password = prompt("Enter Admin Password");
+  if(password==="Rishaan@2026"){ 
+    let productIndex = prompt("Enter product number to edit price (0 to "+(products.length-1)+"):");
+    let newPrice = prompt("Enter new price:");
+    if(productIndex!==null && newPrice!==null){
+      products[parseInt(productIndex)].price = parseFloat(newPrice);
+      document.getElementById(`price-${productIndex}`).innerText = newPrice;
+      alert("Price updated successfully!");
+    }
+  } 
+  else { alert("Wrong Password"); }
+}
+
+// Scroll-on-click for categories
+document.querySelectorAll('.category').forEach(cat=>{
+  cat.addEventListener('click',()=>{
+    const categoryName = cat.getAttribute('data-category');
+    const targetProduct = document.querySelector(`.product-card[data-category="${categoryName}"]`);
+    if(targetProduct){
+      targetProduct.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+  });
+});
+
+renderProducts();
+</script>
+
+</body>
+</html>
